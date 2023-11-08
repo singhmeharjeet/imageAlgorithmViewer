@@ -5,11 +5,11 @@
 #include <imgui_impl_sdlrenderer3.h>
 #include <tinyfiledialogs.h>
 
+#include "image.h"
 #include "myfont.cpp"
 #include "style.h"
-#include "image.h"
 
-#define WIDTH 1200
+#define WIDTH  1200
 #define HEIGHT 800
 
 const int NUM_PAGES = 4;
@@ -24,14 +24,12 @@ enum {
 } Page;
 
 enum {
-	LEFT, RIGHT
+	LEFT,
+	RIGHT
 } Side;
-
 
 // Main code
 int main(int, char **) {
-
-
 	// Setup SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
 		printf("Error: SDL_Init(): %s\n", SDL_GetError());
@@ -45,7 +43,7 @@ int main(int, char **) {
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	// Create window with SDL_Renderer graphics context
-	auto window_flags = (SDL_WindowFlags) (SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+	auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
 	SDL_Window *window = SDL_CreateWindow("Image Viewer", WIDTH, HEIGHT, window_flags);
 	if (window == nullptr) {
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -64,7 +62,7 @@ int main(int, char **) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO &io = ImGui::GetIO();
-	(void) io;
+	(void)io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
@@ -91,10 +89,10 @@ int main(int, char **) {
 	bool image_update = false;
 	Image image[NUM_PAGES][NUM_SIDES];
 	const char *labels[NUM_PAGES][NUM_SIDES] = {
-			{"Original Image",  "Grayscale Image"},
-			{"Brightness 50%",  "Brightness 50% + Grayscale"},
-			{"Grayscale Image", "Dithering"},
-			{"Original Image",  "Color Corrected"},
+		{"Original Image", "Grayscale Image"},
+		{"Brightness 50%", "Brightness 50% + Grayscale"},
+		{"Grayscale Image", "Dithering"},
+		{"Original Image", "Color Corrected"},
 	};
 
 	// Main loop
@@ -117,9 +115,7 @@ int main(int, char **) {
 
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowSize(ImVec2(WIDTH, HEIGHT));
-		ImGui::Begin("Image Viewer", &show_upload_button,
-					 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-					 ImGuiWindowFlags_NoResize);
+		ImGui::Begin("Image Viewer", &show_upload_button, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
 		ImGui::Dummy(ImVec2(padding / 2, 10.0f));
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 255.0f, 1.0f), "Select a file to continue");
@@ -127,14 +123,16 @@ int main(int, char **) {
 
 		if (ImGui::Button("Choose file")) {
 			auto filepath = tinyfd_openFileDialog(
-					"Select a .tiff file to display",
-					"",
-					1,
-					(const char *[]) {"*.tif"},
-					"TIFF files",
-					0
-			);
+				"Select a .tiff file to display",
+				"",
+				1,
+				(const char *[]){"*.tif"},
+				"TIFF files",
+				0);
+
 			if (filepath == nullptr) {
+				ImGui::End();
+				ImGui::EndFrame();
 				continue;
 			}
 
@@ -150,10 +148,12 @@ int main(int, char **) {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Close")) {
+			ImGui::End();
+			ImGui::EndFrame();
 			break;
 		}
 
-		if (image_update) { // These updates are cached
+		if (image_update) {	 // These updates are cached
 			// PAGE1
 			image[PAGE1][RIGHT].set_grayscale();
 
@@ -212,8 +212,7 @@ int main(int, char **) {
 		// Rendering
 		ImGui::Render();
 
-		SDL_SetRenderDrawColor(renderer, (Uint8) (clear_color.x * 255), (Uint8) (clear_color.y * 255),
-							   (Uint8) (clear_color.z * 255), (Uint8) (clear_color.w * 255));
+		SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
 		SDL_RenderClear(renderer);
 		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
 		SDL_RenderPresent(renderer);
@@ -223,7 +222,6 @@ int main(int, char **) {
 	ImGui_ImplSDLRenderer3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
-
 
 	// Destroy the textures before the renderer
 	for (int i = PAGE1; i <= PAGE4; i++) {
@@ -239,4 +237,3 @@ int main(int, char **) {
 
 	return 0;
 }
-
